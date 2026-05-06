@@ -4,11 +4,14 @@ import pandas as pd
 import joblib
 import os
 
-app = FastAPI(title="API Prediksi Gaji Karyawan")
+app = FastAPI(
+    title="API Prediksi Gaji Karyawan",
+    description="Backend untuk memprediksi gaji berdasarkan pengalaman, wilayah, dan level karir."
+)
 
-# ngeload model
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MODEL_PATH = "model_gaji_linear.pkl"
+MODEL_PATH = os.path.join(BASE_DIR, "..", "Model", "model_gaji_linear.pkl")
 
 if os.path.exists(MODEL_PATH):
     model = joblib.load(MODEL_PATH)
@@ -16,7 +19,7 @@ else:
     model = None
     print("Peringatan: File model_gaji_linear.pkl tidak ditemukan!")
 
-# 2. look up table
+# look up table
 reference_data = {
     "DKI Jakarta": {"umr": 5067381, "rata2_gaji": 7500000},
     "Jawa Barat": {"umr": 2157000, "rata2_gaji": 4800000},
@@ -25,11 +28,14 @@ reference_data = {
 
 }
 
-# 3. inputan frontend
+# inputan frontend
 class SalaryInput(BaseModel):
     pengalamanKerja: float
     mapped_region: str
     career_level: str
+    edu_simple: str        
+    size_simple: str      
+    industry_simple: str
 
 @app.get("/")
 def read_root():
@@ -46,14 +52,16 @@ async def predict_salary(data: SalaryInput):
     if not region_info:
         raise HTTPException(status_code=400, detail="Wilayah tidak ditemukan dalam database.")
 
-    # B. Susun data menjadi DataFrame (Harus urut sesuai variabel X saat training)
-    # X = ['pengalamanKerja', 'rata2Gaji', 'UMR', 'career_level', 'mapped_region']
+
     input_features = pd.DataFrame([{
         "pengalamanKerja": data.pengalamanKerja,
         "rata2Gaji": region_info["rata2_gaji"],
         "UMR": region_info["umr"],
         "career_level": data.career_level,
-        "mapped_region": data.mapped_region
+        "mapped_region": data.mapped_region,
+        "edu_simple": data.edu_simple,     
+        "size_simple": data.size_simple,        
+        "industry_simple": data.industry_simple
     }])
 
     try:
