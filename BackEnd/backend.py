@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import joblib
@@ -9,8 +10,15 @@ app = FastAPI(
     description="Backend untuk memprediksi gaji berdasarkan pengalaman, wilayah, dan level karir."
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "..", "Model", "model_gaji_linear.pkl")
 
 if os.path.exists(MODEL_PATH):
@@ -19,62 +27,149 @@ else:
     model = None
     print("Peringatan: File model_gaji_linear.pkl tidak ditemukan!")
 
-# look up table
+# ── Look-up table ──────────────────────────────────────────────────────────────
+# KEY harus HURUF KAPITAL persis seperti di training data (provinsi mapping)
 reference_data = {
-    "DKI Jakarta": {"umr": 5067381, "rata2_gaji": 7500000},
-    "Jawa Barat": {"umr": 2157000, "rata2_gaji": 4800000},
-    "Banten": {"umr": 4500000, "rata2_gaji": 5800000},
-    "Jawa Tengah": {"umr": 2036000, "rata2_gaji": 3500000}
-
+    "DKI JAKARTA":   {"umr": 5067381,  "rata2_gaji": 7500000},
+    "JAWA BARAT":    {"umr": 2157000,  "rata2_gaji": 4800000},
+    "BANTEN":        {"umr": 4500000,  "rata2_gaji": 5800000},
+    "JAWA TENGAH":   {"umr": 2036000,  "rata2_gaji": 3500000},
+    "JAWA TIMUR":    {"umr": 2040000,  "rata2_gaji": 4200000},
+    "DI YOGYAKARTA": {"umr": 2125000,  "rata2_gaji": 3800000},
+    "BALI":          {"umr": 2900000,  "rata2_gaji": 4500000},
 }
 
-# inputan frontend
+# ── Mapping: nilai display frontend  →  nilai asli di training data ────────────
+
+# edu_simple: nilai asli = ['Lainnya','SMA/SMK','Diploma','S1','S2','S3']
+EDU_MAPPING = {
+    "S1":              "S1",
+    "Sarjana (S1)":    "S1",
+    "S2":              "S2",
+    "Magister (S2)":   "S2",
+    "S3":              "S3",
+    "Doktor (S3)":     "S3",
+    "D3":              "Diploma",
+    "D4":              "Diploma",
+    "Diploma (D3/D4)": "Diploma",
+    "SMA":             "SMA/SMK",
+    "SMA/SMK":         "SMA/SMK",
+    "Lainnya":         "Lainnya",
+}
+
+# size_simple: nilai asli = ['Tidak Diketahui','Kecil','Menengah','Besar','Sangat Besar']
+SIZE_MAPPING = {
+    "Sangat Besar": "Sangat Besar",   # > 5000 karyawan
+    "Besar":        "Besar",           # > 2000 karyawan
+    "Menengah":     "Menengah",        # > 500 karyawan
+    "Kecil":        "Kecil",           # > 50 karyawan
+    "Medium":       "Menengah",        # alias dari frontend lama
+    "Large":        "Besar",
+    "Small":        "Kecil",
+}
+
+# career_level: nilai langsung dari frontend sudah sesuai training data
+# OneHotEncoder(handle_unknown='ignore') menangani nilai tak dikenal
+
+# mapped_region: nilai asli HURUF KAPITAL
+REGION_MAPPING = {
+    # DKI Jakarta
+    "Jakarta Pusat":   "DKI JAKARTA",
+    "Jakarta Selatan": "DKI JAKARTA",
+    "Jakarta Utara":   "DKI JAKARTA",
+    "Jakarta Barat":   "DKI JAKARTA",
+    "Jakarta Timur":   "DKI JAKARTA",
+    "Jakarta Raya":    "DKI JAKARTA",
+    "DKI Jakarta":     "DKI JAKARTA",
+    "DKI JAKARTA":     "DKI JAKARTA",
+    # Jawa Barat
+    "Bandung":         "JAWA BARAT",
+    "Bekasi":          "JAWA BARAT",
+    "Bogor":           "JAWA BARAT",
+    "Depok":           "JAWA BARAT",
+    "Jawa Barat":      "JAWA BARAT",
+    "JAWA BARAT":      "JAWA BARAT",
+    # Banten
+    "Tangerang":       "BANTEN",
+    "Tangerang Selatan": "BANTEN",
+    "Serang":          "BANTEN",
+    "Cilegon":         "BANTEN",
+    "Banten":          "BANTEN",
+    "BANTEN":          "BANTEN",
+    # Jawa Tengah
+    "Semarang":        "JAWA TENGAH",
+    "Solo":            "JAWA TENGAH",
+    "Jawa Tengah":     "JAWA TENGAH",
+    "JAWA TENGAH":     "JAWA TENGAH",
+    # Jawa Timur
+    "Surabaya":        "JAWA TIMUR",
+    "Malang":          "JAWA TIMUR",
+    "JAWA TIMUR":      "JAWA TIMUR",
+    # Yogyakarta
+    "Yogyakarta":      "DI YOGYAKARTA",
+    "DI YOGYAKARTA":   "DI YOGYAKARTA",
+    # Bali
+    "Denpasar":        "BALI",
+    "Bali":            "BALI",
+    "BALI":            "BALI",
+}
+
+
 class SalaryInput(BaseModel):
-    pengalamanKerja: float
-    mapped_region: str
-    career_level: str
-    edu_simple: str        
-    size_simple: str      
-    industry_simple: str
+    pengalamanKerja:  float
+    mapped_region:    str
+    career_level:     str
+    edu_simple:       str
+    size_simple:      str
+    industry_simple:  str
+
 
 @app.get("/")
 def read_root():
     return {"message": "Selamat datang di API Prediksi Gaji"}
 
-# 4. prediksi
+
 @app.post("/predict")
 async def predict_salary(data: SalaryInput):
     if model is None:
         raise HTTPException(status_code=500, detail="Model belum siap.")
 
-    # ambil UMR sama rata rata gaji berdasarkan region
-    region_info = reference_data.get(data.mapped_region)
-    if not region_info:
-        raise HTTPException(status_code=400, detail="Wilayah tidak ditemukan dalam database.")
+    # ── Normalisasi semua input ──────────────────────────────────────────────
+    region_key    = REGION_MAPPING.get(data.mapped_region, data.mapped_region.upper())
+    edu_mapped    = EDU_MAPPING.get(data.edu_simple, "Lainnya")
+    size_mapped   = SIZE_MAPPING.get(data.size_simple, "Tidak Diketahui")
+    career_mapped = data.career_level  # sudah benar dari frontend
 
+    region_info = reference_data.get(region_key)
+    if not region_info:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Wilayah '{data.mapped_region}' (→ '{region_key}') tidak ditemukan dalam database."
+        )
 
     input_features = pd.DataFrame([{
-        "pengalamanKerja": data.pengalamanKerja,
-        "rata2Gaji": region_info["rata2_gaji"],
-        "UMR": region_info["umr"],
-        "career_level": data.career_level,
-        "mapped_region": data.mapped_region,
-        "edu_simple": data.edu_simple,     
-        "size_simple": data.size_simple,        
-        "industry_simple": data.industry_simple
+        "pengalamanKerja":  data.pengalamanKerja,
+        "rata2Gaji":        region_info["rata2_gaji"],
+        "UMR":              region_info["umr"],
+        "career_level":     career_mapped,
+        "mapped_region":    region_key,
+        "edu_simple":       edu_mapped,
+        "size_simple":      size_mapped,
+        "industry_simple":  data.industry_simple,
     }])
 
     try:
-        # C. Lakukan Prediksi
         prediction = model.predict(input_features)
-        
         return {
-            "status": "success",
+            "status":     "success",
             "prediction": round(float(prediction[0]), 0),
-            "currency": "IDR",
+            "currency":   "IDR",
             "details": {
-                "region_used": data.mapped_region,
-                "umr_applied": region_info["umr"]
+                "region_used":   region_key,
+                "umr_applied":   region_info["umr"],
+                "edu_mapped":    edu_mapped,
+                "size_mapped":   size_mapped,
+                "career_mapped": career_mapped,
             }
         }
     except Exception as e:
