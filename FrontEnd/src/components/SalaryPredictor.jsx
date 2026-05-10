@@ -3,16 +3,14 @@ import appBgImage from '../assets/bg-salary.png';
 import moneyBag from '../assets/money-bag.png';
 import coins from '../assets/coins.png';
 
-// ── Nilai harus PERSIS sama dengan yang ada di training data ──────────────────
 const EDU_OPTIONS = [
   { label: "SMA/SMK",        value: "SMA/SMK" },
   { label: "Diploma (D3/D4)", value: "Diploma (D3/D4)" },
-  { label: "Sarjana (S1)",    value: "S1" },        // value dikirim = "S1"
+  { label: "Sarjana (S1)",    value: "S1" },        
   { label: "Magister (S2)",   value: "S2" },
   { label: "Doktor (S3)",     value: "S3" },
 ];
 
-// Nilai HARUS persis sama dengan career_level di dataset
 const CAREER_OPTIONS = [
   { label: "Fresh Graduate / < 1 Tahun", value: "Lulusan baru/Pengalaman kerja kurang dari 1 tahun" },
   { label: "Pegawai / Staff",            value: "Pegawai (non-manajemen & non-supervisor)" },
@@ -29,7 +27,7 @@ const SIZE_OPTIONS = [
   { label: "Sangat Besar (> 2000)",   value: "Sangat Besar" },
 ];
 
-// Nilai HARUS persis sama dengan company_industry di dataset (top 10 + Lainnya)
+
 const INDUSTRY_OPTIONS = [
   { label: "IT / Perangkat Lunak",    value: "Komputer/Teknik Informatika (Perangkat Lunak)" },
   { label: "Manajemen / Konsulting",  value: "Manajemen/Konsulting HR" },
@@ -66,7 +64,7 @@ const JOB_TITLE_OPTIONS = [
   { label: "Lainnya",                  value: "Lainnya" },
 ];
 
-// Mapping lokasi → region (HURUF KAPITAL = format training data)
+
 const REGION_MAP = {
   "Jakarta Pusat":    "DKI JAKARTA",
   "Jakarta Selatan":  "DKI JAKARTA",
@@ -113,9 +111,9 @@ const SalaryPredictor = () => {
     const payload = {
       job_title:       formData.job_title,
       pengalamanKerja: parseFloat(formData.experience) || 0,
-      mapped_region:   regionValue,          // contoh: "DKI JAKARTA"
+      mapped_region:   regionValue,          
       career_level:    formData.career_level,
-      edu_simple:      formData.education,   // contoh: "S1"
+      edu_simple:      formData.education,   
       size_simple:     formData.company_size,
       industry_simple: formData.industry,
     };
@@ -161,14 +159,13 @@ const SalaryPredictor = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
-            <h2 className="text-3xl font-black text-gray-800 tracking-tight">SalaryPredict</h2>
-            <p className="text-gray-500 text-sm font-medium mt-1">Estimasi gaji berdasarkan data Kelompok 1</p>
+            <h2 className="text-3xl font-black text-gray-800 tracking-tight">Salary Prediction</h2>
+            <p className="text-gray-500 text-sm font-medium mt-1">By Kelompok 3</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handlePredict} className="space-y-5">
 
-            {/* Posisi Pekerjaan */}
+            {/* Job Title */}
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
                 Posisi Pekerjaan
@@ -186,7 +183,7 @@ const SalaryPredictor = () => {
             </div>
 
 
-            {/* Lokasi + Pengalaman */}
+            {/* Location */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Lokasi</label>
@@ -212,7 +209,7 @@ const SalaryPredictor = () => {
               </div>
             </div>
 
-            {/* Career Level + Pendidikan */}
+            {/* Level Karir */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Level Karir</label>
@@ -240,7 +237,7 @@ const SalaryPredictor = () => {
               </div>
             </div>
 
-            {/* Ukuran Perusahaan + Industri */}
+            {/* Ukuran Perusahaan */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Ukuran Perusahaan</label>
@@ -268,7 +265,7 @@ const SalaryPredictor = () => {
               </div>
             </div>
 
-            {/* Tombol Prediksi */}
+            {}
             <button
               type="submit"
               disabled={loading}

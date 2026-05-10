@@ -27,8 +27,7 @@ else:
     model = None
     print("Peringatan: File model_gaji_linear.pkl tidak ditemukan!")
 
-# ── Look-up table ──────────────────────────────────────────────────────────────
-# KEY harus HURUF KAPITAL persis seperti di training data (provinsi mapping)
+# Look-up table 
 reference_data = {
     "DKI JAKARTA":   {"umr": 5067381,  "rata2_gaji": 7500000},
     "JAWA BARAT":    {"umr": 2157000,  "rata2_gaji": 4800000},
@@ -39,9 +38,6 @@ reference_data = {
     "BALI":          {"umr": 2900000,  "rata2_gaji": 4500000},
 }
 
-# ── Mapping: nilai display frontend  →  nilai asli di training data ────────────
-
-# edu_simple: nilai asli = ['Lainnya','SMA/SMK','Diploma','S1','S2','S3']
 EDU_MAPPING = {
     "S1":              "S1",
     "Sarjana (S1)":    "S1",
@@ -57,23 +53,19 @@ EDU_MAPPING = {
     "Lainnya":         "Lainnya",
 }
 
-# size_simple: nilai asli = ['Tidak Diketahui','Kecil','Menengah','Besar','Sangat Besar']
 SIZE_MAPPING = {
-    "Sangat Besar": "Sangat Besar",   # > 5000 karyawan
-    "Besar":        "Besar",           # > 2000 karyawan
-    "Menengah":     "Menengah",        # > 500 karyawan
-    "Kecil":        "Kecil",           # > 50 karyawan
-    "Medium":       "Menengah",        # alias dari frontend lama
+    "Sangat Besar": "Sangat Besar",  
+    "Besar":        "Besar",          
+    "Menengah":     "Menengah",       
+    "Kecil":        "Kecil",          
+    "Medium":       "Menengah",        
     "Large":        "Besar",
     "Small":        "Kecil",
 }
 
-# career_level: nilai langsung dari frontend sudah sesuai training data
-# OneHotEncoder(handle_unknown='ignore') menangani nilai tak dikenal
 
-# mapped_region: nilai asli HURUF KAPITAL
 REGION_MAPPING = {
-    # DKI Jakarta
+  
     "Jakarta Pusat":   "DKI JAKARTA",
     "Jakarta Selatan": "DKI JAKARTA",
     "Jakarta Utara":   "DKI JAKARTA",
@@ -82,33 +74,33 @@ REGION_MAPPING = {
     "Jakarta Raya":    "DKI JAKARTA",
     "DKI Jakarta":     "DKI JAKARTA",
     "DKI JAKARTA":     "DKI JAKARTA",
-    # Jawa Barat
+   
     "Bandung":         "JAWA BARAT",
     "Bekasi":          "JAWA BARAT",
     "Bogor":           "JAWA BARAT",
     "Depok":           "JAWA BARAT",
     "Jawa Barat":      "JAWA BARAT",
     "JAWA BARAT":      "JAWA BARAT",
-    # Banten
+   
     "Tangerang":       "BANTEN",
     "Tangerang Selatan": "BANTEN",
     "Serang":          "BANTEN",
     "Cilegon":         "BANTEN",
     "Banten":          "BANTEN",
     "BANTEN":          "BANTEN",
-    # Jawa Tengah
+    
     "Semarang":        "JAWA TENGAH",
     "Solo":            "JAWA TENGAH",
     "Jawa Tengah":     "JAWA TENGAH",
     "JAWA TENGAH":     "JAWA TENGAH",
-    # Jawa Timur
+   
     "Surabaya":        "JAWA TIMUR",
     "Malang":          "JAWA TIMUR",
     "JAWA TIMUR":      "JAWA TIMUR",
-    # Yogyakarta
+    
     "Yogyakarta":      "DI YOGYAKARTA",
     "DI YOGYAKARTA":   "DI YOGYAKARTA",
-    # Bali
+    
     "Denpasar":        "BALI",
     "Bali":            "BALI",
     "BALI":            "BALI",
@@ -156,7 +148,7 @@ async def predict_salary(data: SalaryInput):
     if model is None:
         raise HTTPException(status_code=500, detail="Model belum siap.")
 
-    # ── Normalisasi semua input ──────────────────────────────────────────────
+    
     region_key    = REGION_MAPPING.get(data.mapped_region, data.mapped_region.upper())
     edu_mapped    = EDU_MAPPING.get(data.edu_simple, "Lainnya")
     size_mapped   = SIZE_MAPPING.get(data.size_simple, "Tidak Diketahui")
