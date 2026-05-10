@@ -44,6 +44,28 @@ const INDUSTRY_OPTIONS = [
   { label: "Lainnya",                 value: "Lainnya" },
 ];
 
+const JOB_TITLE_OPTIONS = [
+  { label: "Sales Executive",          value: "Sales Executive" },
+  { label: "Digital Marketing",        value: "Digital Marketing" },
+  { label: "Graphic Designer",         value: "Graphic Designer" },
+  { label: "Sales Officer",            value: "Sales Officer" },
+  { label: "Content Creator",          value: "Content Creator" },
+  { label: "Accounting Staff",         value: "Accounting Staff" },
+  { label: "Sales Engineer",           value: "Sales Engineer" },
+  { label: "Account Executive",        value: "Account Executive" },
+  { label: "Sales Marketing",          value: "Sales Marketing" },
+  { label: "Sales Manager",            value: "Sales Manager" },
+  { label: "Telemarketing",            value: "Telemarketing" },
+  { label: "Marketing Executive",      value: "Marketing Executive" },
+  { label: "Interior Designer",        value: "Interior Designer" },
+  { label: "HR Staff",                 value: "Hr Staff" },
+  { label: "Social Media Specialist",  value: "Social Media Specialist" },
+  { label: "Area Sales Supervisor",    value: "Area Sales Supervisor" },
+  { label: "Project Manager",          value: "Project Manager" },
+  { label: "Marketing Staff",          value: "Marketing Staff" },
+  { label: "Lainnya",                  value: "Lainnya" },
+];
+
 // Mapping lokasi → region (HURUF KAPITAL = format training data)
 const REGION_MAP = {
   "Jakarta Pusat":    "DKI JAKARTA",
@@ -67,11 +89,11 @@ const REGION_MAP = {
 
 const SalaryPredictor = () => {
   const [formData, setFormData] = useState({
-    job_title:    '',
+    job_title:    'Software Engineer',
     location:     'Jakarta Pusat',
     experience:   0,
     career_level: 'Pegawai (non-manajemen & non-supervisor)',
-    education:    'S1',           // value, bukan label
+    education:    'S1',
     company_size: 'Menengah',
     industry:     'Komputer/Teknik Informatika (Perangkat Lunak)',
   });
@@ -89,6 +111,7 @@ const SalaryPredictor = () => {
     const regionValue = REGION_MAP[formData.location] ?? "DKI JAKARTA";
 
     const payload = {
+      job_title:       formData.job_title,
       pengalamanKerja: parseFloat(formData.experience) || 0,
       mapped_region:   regionValue,          // contoh: "DKI JAKARTA"
       career_level:    formData.career_level,
@@ -147,15 +170,21 @@ const SalaryPredictor = () => {
 
             {/* Posisi Pekerjaan */}
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Posisi Pekerjaan</label>
-              <input
-                type="text"
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                Posisi Pekerjaan
+              </label>
+              <select
                 required
-                placeholder="Ex: Software Engineer"
-                className="w-full p-4 bg-gray-50/40 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:bg-white outline-none transition-all placeholder:text-gray-300"
+                className="w-full p-4 bg-gray-50/40 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:bg-white outline-none transition-all"
+                value={formData.job_title}
                 onChange={handleChange('job_title')}
-              />
+              >
+                {JOB_TITLE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </div>
+
 
             {/* Lokasi + Pengalaman */}
             <div className="grid grid-cols-2 gap-4">
@@ -176,7 +205,7 @@ const SalaryPredictor = () => {
                 <input
                   type="number"
                   min="0"
-                  defaultValue={0}
+                  value={formData.experience}
                   className="w-full p-4 bg-gray-50/40 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition-all"
                   onChange={handleChange('experience')}
                 />

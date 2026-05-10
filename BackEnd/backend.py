@@ -114,8 +114,30 @@ REGION_MAPPING = {
     "BALI":            "BALI",
 }
 
+JOB_TITLE_MAPPING = {
+    "Sales Executive":         "Sales Executive",
+    "Digital Marketing":       "Digital Marketing",
+    "Graphic Designer":        "Graphic Designer",
+    "Sales Officer":           "Sales Officer",
+    "Content Creator":         "Content Creator",
+    "Accounting Staff":        "Accounting Staff",
+    "Sales Engineer":          "Sales Engineer",
+    "Account Executive":       "Account Executive",
+    "Sales Marketing":         "Sales Marketing",
+    "Sales Manager":           "Sales Manager",
+    "Telemarketing":           "Telemarketing",
+    "Marketing Executive":     "Marketing Executive",
+    "Interior Designer":       "Interior Designer",
+    "Hr Staff":                "Hr Staff",
+    "Social Media Specialist": "Social Media Specialist",
+    "Area Sales Supervisor":   "Area Sales Supervisor",
+    "Project Manager":         "Project Manager",
+    "Marketing Staff":         "Marketing Staff",
+    "Lainnya":                 "Lainnya",
+}
 
 class SalaryInput(BaseModel):
+    job_title:        str
     pengalamanKerja:  float
     mapped_region:    str
     career_level:     str
@@ -138,7 +160,8 @@ async def predict_salary(data: SalaryInput):
     region_key    = REGION_MAPPING.get(data.mapped_region, data.mapped_region.upper())
     edu_mapped    = EDU_MAPPING.get(data.edu_simple, "Lainnya")
     size_mapped   = SIZE_MAPPING.get(data.size_simple, "Tidak Diketahui")
-    career_mapped = data.career_level  # sudah benar dari frontend
+    career_mapped = data.career_level
+    job_mapped    = JOB_TITLE_MAPPING.get(data.job_title, data.job_title)
 
     region_info = reference_data.get(region_key)
     if not region_info:
@@ -156,6 +179,7 @@ async def predict_salary(data: SalaryInput):
         "edu_simple":       edu_mapped,
         "size_simple":      size_mapped,
         "industry_simple":  data.industry_simple,
+        "job_title":        job_mapped,
     }])
 
     try:
@@ -165,6 +189,7 @@ async def predict_salary(data: SalaryInput):
             "prediction": round(float(prediction[0]), 0),
             "currency":   "IDR",
             "details": {
+                "job_title_used": job_mapped,
                 "region_used":   region_key,
                 "umr_applied":   region_info["umr"],
                 "edu_mapped":    edu_mapped,
