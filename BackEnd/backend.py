@@ -191,3 +191,7 @@ async def predict_salary(data: SalaryInput):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal melakukan prediksi: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
