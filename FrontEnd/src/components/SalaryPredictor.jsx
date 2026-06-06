@@ -120,7 +120,7 @@ const SalaryPredictor = () => {
 
     try {
       console.log("Payload dikirim:", payload);
-      const response = await fetch('https://aol-ml-production.up.railway.app/predict', {
+      const response = await fetch('https://briansnjya-deploy-backend.hf.space', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
