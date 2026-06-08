@@ -1,11 +1,12 @@
 ---
-title: Deploy Backend
-emoji: 😻
+title: Backend ML Salary Predictor
+emoji: 🚀
 colorFrom: blue
-colorTo: red
+colorTo: green
 sdk: docker
 pinned: false
-license: apache-2.0
 ---
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# Backend API Salary Predictor
+
+Ini adalah server backend FastAPI untuk memprediksi gaji.
