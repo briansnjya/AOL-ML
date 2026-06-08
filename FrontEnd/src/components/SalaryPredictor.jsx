@@ -135,7 +135,7 @@ const SalaryPredictor = () => {
       }
     } catch (error) {
       console.error('Error sambung ke Backend:', error);
-      alert('Gagal menyambung! Pastikan Backend berjalan di port 8000.');
+      alert('Gagal menyambung! Pastikan server backend sedang aktif.');
     } finally {
       setLoading(false);
     }
