@@ -3,7 +3,7 @@ name: Deploy Backend to Hugging Face
 on:
   push:
     branches:
-      - main # Berjalan otomatis saat ada push ke branch main
+      - main
 
 jobs:
   deploy-backend:
@@ -15,11 +15,24 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Push to Hugging Face Spaces
+      - name: Push Clean Backend to Hugging Face Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Jangan lupa ubah USERNAME_HF dan NAMA_SPACE di bawah ini
-          # sesuai dengan link Hugging Face Spaces kamu ya!
+          # 1. Hapus folder berat & file yang tidak dibutuhkan Hugging Face
+          rm -rf Model FrontEnd .gitattributes
+
+          # 2. Hapus riwayat Git lama dan buat Git baru khusus untuk server
+          rm -rf .git
+          git init
+          git checkout -b main
+
+          # 3. Bungkus sisa file (hanya BackEnd dan Dockerfile)
+          git add .
+          git config user.email "bot@github.com"
+          git config user.name "GitHub Actions"
+          git commit -m "Deploy clean backend to Hugging Face"
+
+          # 4. Kirim paksa secara bersih ke Hugging Face
           git remote add hf https://briansnjya:$HF_TOKEN@huggingface.co/spaces/briansnjya/backend-ml
           git push hf main -f
