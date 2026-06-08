@@ -1,0 +1,24 @@
+name: Deploy Backend to Hugging Face
+
+on:
+  push:
+    branches:
+      - main # Berjalan otomatis saat ada push ke branch main
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Push to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Jangan lupa ubah USERNAME_HF dan NAMA_SPACE di bawah ini
+          # sesuai dengan link Hugging Face Spaces kamu ya!
+          git remote add hf https://briansnjya:$HF_TOKEN@huggingface.co/spaces/briansnjya/backend-ml
+          git push hf main -f
