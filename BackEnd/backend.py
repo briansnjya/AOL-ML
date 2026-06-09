@@ -159,7 +159,7 @@ async def predict_salary(data: SalaryInput):
     if not region_info:
         raise HTTPException(
             status_code=400,
-            detail=f"Wilayah '{data.mapped_region}' (→ '{region_key}') tidak ditemukan dalam database."
+            detail=f"Wilayah '{data.mapped_region}' (-> '{region_key}') tidak ditemukan dalam database."
         )
 
     input_features = pd.DataFrame([{
